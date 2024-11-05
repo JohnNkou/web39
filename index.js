@@ -4,7 +4,7 @@ import { get_response_data, get_session_cookies } from './src/utils.js'
 
 let agent = new https.Agent({ keepAlive: true, keepAliveMsecs:300 })
 
-export class Web39{
+export default class Web39{
 	#security_token;
 	#zone;
 	#session_cookie;

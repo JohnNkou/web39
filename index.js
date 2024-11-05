@@ -85,6 +85,8 @@ export default class Web39{
 
 							if(serial){
 								await this.add_zone_data({ name,ttl, ip, serial });
+
+								return resolve(true);
 							}
 							else{
 								console.error("No serial found in error",data.errors);
@@ -137,6 +139,8 @@ export default class Web39{
 
 							if(serial){
 								await this.update_zone_data({ name,ttl, ip, line_index, serial });
+
+								return resolve(true);
 							}
 							else{
 								console.error("No serial found in error",data.errors);
@@ -144,7 +148,6 @@ export default class Web39{
 							}
 						}
 						else{
-							console.log("ODD DATA",data);
 							reject(new Error("Data couldn't be updated"));
 						}
 					}

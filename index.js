@@ -134,17 +134,23 @@ export default class Web39{
 					}
 					else{
 						if(data.errors){
-							let error = data.errors[0],
-							serial = error.match(/\d{10}/g)[0];
+							try{
+								let error = data.errors[0],
+								serial = error.match(/\d{10}/g)[0];
 
-							if(serial){
-								await this.update_zone_data({ name,ttl, ip, line_index, serial });
+								if(serial){
+									await this.update_zone_data({ name,ttl, ip, line_index, serial });
 
-								return resolve(true);
+									return resolve(true);
+								}
+								else{
+									console.error("No serial found in error",data.errors);
+									return reject(new Error("No serial found"));
+								}
 							}
-							else{
-								console.error("No serial found in error",data.errors);
-								return reject(new Error("No serial found"));
+							catch(error){
+								console.error("Error processing data.errors", data.errors);
+								throw error;
 							}
 						}
 						else{

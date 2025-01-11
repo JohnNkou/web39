@@ -84,7 +84,7 @@ export default class Web39{
 							serial = error.match(/\d{10}/g)[0];
 
 							if(serial){
-								await this.add_zone_data({ name,ttl, ip, serial });
+								await this.add_zone_data({ name,ttl, ip, record_type, serial });
 
 								return resolve(true);
 							}
@@ -136,7 +136,7 @@ export default class Web39{
 							serial = error.match(/\d{10}/g)[0];
 
 							if(serial){
-								await this.delete_zone_data({ name,ttl, ip, serial });
+								await this.delete_zone_data({ line_index, serial });
 
 								return resolve(true);
 							}
@@ -191,7 +191,7 @@ export default class Web39{
 								serial = error.match(/\d{10}/g)[0];
 
 								if(serial){
-									await this.update_zone_data({ name,ttl, ip, line_index, serial });
+									await this.update_zone_data({ name,ttl, ip, line_index, record_type, serial });
 
 									return resolve(true);
 								}

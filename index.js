@@ -81,7 +81,14 @@ export default class Web39{
 					else{
 						if(data.errors){
 							let error = data.errors[0],
-							serial = error.match(/\d{10}/g)[0];
+							error_match = error.match(/\d{10}/g),
+							serial;
+
+							if(!error_match){
+								throw data;
+							}
+
+							serial = error_match[0];
 
 							if(serial){
 								await this.add_zone_data({ name,ttl, ip, record_type, serial });
@@ -133,7 +140,14 @@ export default class Web39{
 					else{
 						if(data.errors){
 							let error = data.errors[0],
-							serial = error.match(/\d{10}/g)[0];
+							error_match = error.match(/\d{10}/g),
+							serial;
+
+							if(!error_match){
+								throw data;
+							}
+
+							serial = error_match[0];
 
 							if(serial){
 								await this.delete_zone_data({ line_index, serial });
@@ -188,7 +202,14 @@ export default class Web39{
 						if(data.errors){
 							try{
 								let error = data.errors[0],
-								serial = error.match(/\d{10}/g)[0];
+								error_match = error.match(/\d{10}/g),
+								serial;
+
+								if(!error_match){
+									throw data;
+								}
+
+								serial = error_match[0];
 
 								if(serial){
 									await this.update_zone_data({ name,ttl, ip, line_index, record_type, serial });

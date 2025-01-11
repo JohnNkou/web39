@@ -34,7 +34,7 @@ export default class Web39{
 				try{
 					let payload = await get_response_data(res),
 					zones = payload.data.reduce((x,y)=>{
-						if(y.dname_b64 && y.record_type == 'A' && y.dname_b64 == btoa(name)){
+						if(y.dname_b64 && y.dname_b64 == btoa(name)){
 							x.push({
 								name: atob(y.dname_b64),
 								record_type: y.record_type,
@@ -58,10 +58,10 @@ export default class Web39{
 		})
 	}
 
-	async add_zone_data({name,ttl=120,ip, serial=10293890}){
+	async add_zone_data({name,ttl=120,ip, record_type='A', serial=10293890}){
 		return new Promise((resolve,reject)=>{
 			let data = `zone=${this.#zone}&serial=${serial}&add=${JSON.stringify({
-				dname:`${name}.${this.#zone}.`, ttl, record_type:'A', line_index: null, data:[ip]
+				dname:`${name}.${this.#zone}.`, ttl, record_type, line_index: null, data:[ip]
 			})}`,
 			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
 				agent,
@@ -112,10 +112,10 @@ export default class Web39{
 		})
 	}
 
-	async update_zone_data({name,ttl=120,ip, line_index, serial=10293890}){
+	async update_zone_data({name,ttl=120,ip, line_index, record_type='A', serial=10293890}){
 		return new Promise((resolve,reject)=>{
 			let data = `zone=${this.#zone}&serial=${serial}&edit=${JSON.stringify({
-				dname:`${name}.${this.#zone}.`, ttl, record_type:'A', line_index, data:[ip]
+				dname:`${name}.${this.#zone}.`, ttl, record_type, line_index, data:[ip]
 			})}`,
 			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
 				agent,

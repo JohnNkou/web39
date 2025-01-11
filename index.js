@@ -112,6 +112,58 @@ export default class Web39{
 		})
 	}
 
+	async delete_zone_data({line_index, serial=10293890}){
+		return new Promise((resolve,reject)=>{
+			let data = `zone=${this.#zone}&serial=${serial}&remove=${line_index}`,
+			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
+				agent,
+				method:'POST',
+				headers:{
+					'Content-Type':'application/x-www-form-urlencoded',
+					'Cookie': this.#session_cookie,
+					'Content-Length': Buffer.byteLength(data)
+				}
+			},async (res)=>{
+				try{
+					let data = await get_response_data(res);
+
+					if(data.status){
+						resolve(true);
+					}
+					else{
+						if(data.errors){
+							let error = data.errors[0],
+							serial = error.match(/\d{10}/g)[0];
+
+							if(serial){
+								await this.delete_zone_data({ name,ttl, ip, serial });
+
+								return resolve(true);
+							}
+							else{
+								console.error("No serial found in error",data.errors);
+								return reject(new Error("No serial found"));
+							}
+						}
+						else{
+							console.log("ODD DATA",data);
+							reject(new Error("Data couldn't be updated"));
+						}
+					}
+				}
+				catch(error){
+					reject(error);
+				}
+			});
+
+			console.log('DATA TO SEND',data);
+
+			req.on('error',reject);
+
+			req.end(data);
+		})
+	}
+
 	async update_zone_data({name,ttl=120,ip, line_index, record_type='A', serial=10293890}){
 		return new Promise((resolve,reject)=>{
 			let data = `zone=${this.#zone}&serial=${serial}&edit=${JSON.stringify({
@@ -209,3 +261,7 @@ export default class Web39{
 		})
 	}
 }
+
+let w = await Web39.createInstance("rs2216889","TWYmsFWq6f","egouv.online");
+
+console.log("DATA", await w.get_zone_data('snip'));

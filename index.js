@@ -2,14 +2,13 @@ import https from 'https'
 import { BASE_URL, LOGIN_URL, ZONE_PATH, ZONE_EDIT_PATH } from './src/endpoint.js'
 import { get_response_data, get_session_cookies } from './src/utils.js'
 
-let agent = new https.Agent({ keepAlive: true, keepAliveMsecs:300 })
-
 export default class Web39{
 	#security_token;
 	#zone;
 	#session_cookie;
+	#agent;
 
-	constructor(security_token,session_cookie,zone){
+	constructor(security_token,session_cookie,zone,agent){
 		if(!security_token || !zone || !session_cookie){
 			throw Error("Should provide a security_token and a zone");
 		}
@@ -17,13 +16,18 @@ export default class Web39{
 		this.#security_token = security_token;
 		this.#zone = zone;
 		this.#session_cookie = session_cookie;
+		this.#agent = agent;
+		this.get_zone_data = this.get_zone_data.bind(this);
+		this.update_zone_data = this.update_zone_data.bind(this);
+		this.delete_zone_data = this.delete_zone_data.bind(this);
+		this.close = this.close.bind(this);
 	}
 
 	async get_zone_data(name){
 		return new Promise((resolve,reject)=>{
 			let data = `zone=${this.#zone}`,
 			req = https.request(`${BASE_URL}/${this.#security_token}/${ZONE_PATH}`,{  
-				agent,
+				agent: this.#agent,
 				method:'POST',
 				headers:{
 					'Content-Type':'application/x-www-form-urlencoded',
@@ -64,7 +68,7 @@ export default class Web39{
 				dname:`${name}.${this.#zone}.`, ttl, record_type, line_index: null, data:[ip]
 			})}`,
 			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
-				agent,
+				agent: this.#agent,
 				method:'POST',
 				headers:{
 					'Content-Type':'application/x-www-form-urlencoded',
@@ -123,7 +127,7 @@ export default class Web39{
 		return new Promise((resolve,reject)=>{
 			let data = `zone=${this.#zone}&serial=${serial}&remove=${line_index}`,
 			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
-				agent,
+				agent: this.#agent,
 				method:'POST',
 				headers:{
 					'Content-Type':'application/x-www-form-urlencoded',
@@ -184,7 +188,7 @@ export default class Web39{
 				dname:`${name}.${this.#zone}.`, ttl, record_type, line_index, data:[ip]
 			})}`,
 			req = https.request(`${BASE_URL}${this.#security_token}/${ZONE_EDIT_PATH}`,{
-				agent,
+				agent: this.#agent,
 				method:'POST',
 				headers:{
 					'Content-Type':'application/x-www-form-urlencoded',
@@ -244,8 +248,14 @@ export default class Web39{
 		})
 	}
 
+	close(){
+		this.#agent.destroy();
+	}
+
 
 	static async createInstance(user,pass,zone){
+		let agent = new https.Agent({ keepAlive: true, keepAliveMsecs:300 });
+
 		return new Promise((resolve,reject)=>{
 			let data = `user=${user}&pass=${pass}`,
 			req = https.request(LOGIN_URL,{
@@ -262,7 +272,7 @@ export default class Web39{
 					session_cookie = get_session_cookies(res.headers);
 
 					if(security_token){
-						resolve(new Web39(security_token,session_cookie, zone));
+						resolve(new Web39(security_token,session_cookie, zone, agent));
 					}
 					else{
 						console.error("BAD DATA",data);
